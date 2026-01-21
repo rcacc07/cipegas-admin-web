@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Notas Cloud</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+
+
+    <div class="container">
+        <nav class="menu-tabs">
+            <button class="tab-btn active" onclick="cambiarTab('movimientos')">Movimientos</button>
+            <button class="tab-btn" onclick="cambiarTab('cobranzas')">Cobranzas</button>
+            <button class="tab-btn" onclick="cambiarTab('bancos')">Bancos</button>
+        </nav>
+
+        <section id="sec-movimientos" class="tab-content active">
+            <h2>Historial de Movimientos</h2>
+            <ul id="listaMovimientos"></ul>
+        </section>
+
+        <section id="sec-cobranzas" class="tab-content">
+            <h2>Cuenta de Clientes</h2>
+            <ul id="listaCobranzas"></ul>
+        </section>
+
+        <section id="sec-bancos" class="tab-content">
+            <h2>Saldos Bancarios</h2>
+            <ul id="listaBancos"></ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
