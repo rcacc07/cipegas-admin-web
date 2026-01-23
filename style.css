@@ -171,3 +171,124 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
 .tab-content.active {
     display: block;
 }
+
+.header-empresa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f2f5;
+}
+
+.logo-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.info-empresa h1 {
+    font-size: 18px;
+    color: #1a73e8; /* Un azul profesional */
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 800;
+}
+
+.info-empresa p {
+    font-size: 12px;
+    color: #5f6368;
+    margin: 2px 0 0 0;
+    font-weight: 500;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 480px) {
+    .header-empresa {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+.bancos-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto; /* Si hay muchos bancos, puedes deslizar hacia el lado */
+    padding: 10px 0;
+}
+
+.card-banco-mini {
+    background: #ffffff;
+    border-left: 4px solid #28a745;
+    padding: 10px;
+    min-width: 140px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-banco-mini b {
+    display: block;
+    font-size: 14px;
+    color: #333;
+}
+
+.card-banco-mini span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.card-banco-mini small {
+    font-size: 9px;
+    color: #888;
+    display: block;
+}
+
+.bancos-columna {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.card-banco-fila {
+    background: linear-gradient(145deg, #ffffff, #f0f2f5);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #1a73e8; /* Azul empresarial */
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.card-banco-fila:active {
+    transform: scale(0.98); /* Efecto de pulsado en celular */
+}
+
+.info-banco b {
+    font-size: 18px;
+    color: #5f6368;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.info-banco small {
+    display: block;
+    color: #80868b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.monto-banco {
+    font-size: 22px; /* Tamaño grande para el saldo */
+    color: #1e8e3e; /* Verde tipo "ingreso" */
+    font-weight: 800;
+    font-family: 'Roboto', sans-serif; /* O una fuente similar que tengas */
+}

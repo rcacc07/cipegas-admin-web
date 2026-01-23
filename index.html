@@ -13,27 +13,45 @@
 
 
 
-
     <div class="container">
+
+        <div class="header-empresa">
+            <img src="logo-cipegas.png" alt="Logo" class="logo-img">
+            <div class="info-empresa">
+                <h1>COMPAÑIA PETROLERA & GAS CARO SAC</h1>
+                <p>Control de Gestión y Finanzas</p>
+            </div>
+        </div>
+        <h2 id="saludo-gerente" style="font-size: 16px; color: #555; margin-bottom: 20px;"></h2>
+
         <nav class="menu-tabs">
             <button class="tab-btn active" onclick="cambiarTab('movimientos')">Movimientos</button>
             <button class="tab-btn" onclick="cambiarTab('cobranzas')">Cobranzas</button>
-            <button class="tab-btn" onclick="cambiarTab('bancos')">Bancos</button>
+            <button class="tab-btn" onclick="cambiarTab('proveedores')">Proveedores</button>
+            
         </nav>
 
         <section id="sec-movimientos" class="tab-content active">
-            <h2>Historial de Movimientos</h2>
-            <ul id="listaMovimientos"></ul>
+
+            <div class="seccion-bancos">
+            <h3>Saldos en Bancos</h3>
+                <div id="listaBancos" class="bancos-columna"></div>
+            </div>
+
+            <div class="historial-container">
+                <h3>Historial de Movimientos</h3>
+                <ul id="listaMovimientos">
+                </ul>
+            </div>
         </section>
 
         <section id="sec-cobranzas" class="tab-content">
             <h2>Cuenta de Clientes</h2>
             <ul id="listaCobranzas"></ul>
         </section>
-
-        <section id="sec-bancos" class="tab-content">
-            <h2>Saldos Bancarios</h2>
-            <ul id="listaBancos"></ul>
+        <section id="sec-proveedores" class="tab-content">
+            <h2>Cuenta de Proveedores</h2>
+            <ul id="listaProveedores"></ul>
         </section>
     </div>
     <script src="script.js"></script>
