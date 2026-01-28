@@ -91,12 +91,15 @@ async function cargarDatos(tipo) {
 
     let fechaActual = "";
     let contenedorActual = null;
+    let totalSeccion = 0; // Variable para sumar montos
 
     // Invertimos para ver lo más reciente arriba
     datos.reverse().forEach((item) => {
-        const li = (tipo === 'Bancos') ? document.createElement('div') : document.createElement('li');
-        //const li = document.createElement("li");
+        
+        const li = (tipo === 'Bancos') ? document.createElement('div') : document.createElement('li');      
         li.className = "nota-card";
+        const montoNumerico = Number(item.monto) || 0;
+        totalSeccion += montoNumerico; // Sumatoria
 
       if (tipo === "Movimientos") {
         // Lógica de agrupación por fecha y colapso
@@ -141,6 +144,7 @@ async function cargarDatos(tipo) {
                 `;
         contenedorActual.appendChild(li);
       } else if (tipo === "Cobranzas") {
+
         const montoNumerico = Number(item.monto);
 
         // Niveles de alerta para deudas de clientes
@@ -175,6 +179,9 @@ async function cargarDatos(tipo) {
         </div>`;
         lista.appendChild(li);
       } else if (tipo === "Proveedores") {
+
+        
+
         const montoNumerico = Number(item.monto);
 
         // Nueva alerta a partir de 100,000 soles
@@ -248,7 +255,27 @@ async function cargarDatos(tipo) {
       }
     });
 
+    // SOLO mostrar el total si es Cobranzas o Proveedores
+    if (tipo === 'Cobranzas' || tipo === 'Proveedores') {
     
+        const divResumen = document.createElement("div");
+        divResumen.className = "card-resumen-total";
+
+        const esCobranza = (tipo === 'Cobranzas');
+        const titulo = esCobranza ? "TOTAL POR COBRAR" : "TOTAL POR PAGAR";
+        const colorTexto = esCobranza ? "#1a73e8" : "#d9534f";
+
+        divResumen.innerHTML = `
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; border-top: 5px solid ${colorTexto};">
+                <small style="color: #5f6368; font-weight: bold; text-transform: uppercase;">${titulo}</small>
+                <div style="font-size: 24px; font-weight: 800; color: ${colorTexto};">
+                    S/. ${totalSeccion.toLocaleString('es-PE', {minimumFractionDigits: 2})}
+                </div>
+            </div>`;
+    
+        // Insertar al inicio
+        lista.prepend(divResumen);
+    }   
   } catch (e) {
     console.error("Error al cargar:", e);
     lista.innerHTML = "Error al conectar con el servidor.";
