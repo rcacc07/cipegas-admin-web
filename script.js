@@ -92,6 +92,7 @@ async function cargarDatos(tipo) {
     let fechaActual = "";
     let contenedorActual = null;
     let totalSeccion = 0; // Variable para sumar montos
+    let totalGeneralBancos = 0;
 
     // Invertimos para ver lo más reciente arriba
     datos.reverse().forEach((item) => {
@@ -180,8 +181,6 @@ async function cargarDatos(tipo) {
         lista.appendChild(li);
       } else if (tipo === "Proveedores") {
 
-        
-
         const montoNumerico = Number(item.monto);
 
         // Nueva alerta a partir de 100,000 soles
@@ -218,6 +217,8 @@ async function cargarDatos(tipo) {
     `;
     lista.appendChild(li);
       } else if (tipo === "Bancos") {
+
+        totalGeneralBancos += Number(item.saldo) || 0;
         
         const div = document.createElement("div");
         div.className = "card-banco-fila";
@@ -249,11 +250,34 @@ async function cargarDatos(tipo) {
                     <small>🕒 Act: ${fechaHoraTxt}</small>
                 </div>
                 <div class="monto-banco">
-                    S/. ${item.saldo}
+                    S/. ${item.saldo.toLocaleString('es-PE',{minimumFractionDigits:2})}
                 </div>`;
         lista.appendChild(div);
       }
     });
+
+    if(tipo==='Bancos'){
+      // CREAR LA TARJETA DEL TOTAL (La pondremos arriba de todo)
+      const divTotalBancos = document.createElement("div");
+      divTotalBancos.className = "card-total-bancos"; // Nueva clase CSS
+
+      divTotalBancos.innerHTML = `
+        <div class="resumen-header">
+          <span class="emoji-banco">🏦</span>
+          <div class="texto-resumen">
+            <small>SALDO TOTAL DISPONIBLE</small>
+            <h2>S/. ${totalGeneralBancos.toLocaleString('es-PE', {minimumFractionDigits: 2})}</h2>
+          </div>
+        </div>`;
+
+      // Insertar al principio del contenedor de bancos
+      const contenedorBancos = document.getElementById('listaBancos');
+      contenedorBancos.prepend(divTotalBancos);
+
+    }
+
+      
+    
 
     // SOLO mostrar el total si es Cobranzas o Proveedores
     if (tipo === 'Cobranzas' || tipo === 'Proveedores') {
