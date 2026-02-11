@@ -74,7 +74,9 @@ async function guardar(tipo) {
 async function cargarDatos(tipo) {
 
   const lista = document.getElementById("lista" + tipo);
-  if (!lista) return; // Seguridad por si el ID no coincide
+  const seccionP = document.getElementById("seccionPrestamos");
+
+  if (!lista) return; 
 
   lista.innerHTML = "Cargando datos...";
 
@@ -282,49 +284,9 @@ async function cargarDatos(tipo) {
       const contenedorBancos = document.getElementById('listaBancos');
       contenedorBancos.prepend(divTotalBancos);
 
-      // RENDERIZAR PRESTAMOS
-    const contenedorPrestamos = document.getElementById('seccionPrestamos');
-    contenedorPrestamos.innerHTML = ""; // Limpiamos
 
-    if (datos.prestamos && datos.prestamos.length > 0) {
-        contenedorPrestamos.innerHTML = "<h3>📅 Próximos Pagos de Préstamos</h3>";
-        
-        datos.prestamos.forEach(p => {
-            const divP = document.createElement("div");
-            divP.className = "card-cuota-prestamo";
-            divP.innerHTML = `
-                <div class="cuota-header">
-                    <span>${p.banco || p.entidad}</span>
-                    <span class="monto-cuota">S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</span>
-                </div>
-                <div class="cuota-footer">
-                    <span>Cuota: ${p.cuota}</span>
-                    <span class="fecha-vence">Vence: ${p.vencimiento || p.fecha}</span>
-                </div>`;
-            contenedorPrestamos.prepend(divP);
-        });
+      obtenerListaPrestamosParaBancos();
     }
-    }
-
-    if (datos.prestamos) {
-            const contenedorPrestamos = document.getElementById('seccionPrestamos');
-            contenedorPrestamos.innerHTML = "<h3>⏳ Cronograma de Préstamos</h3>";
-            
-            datos.prestamos.forEach(p => {
-                const divP = document.createElement("div");
-                divP.className = "card-cuota-prestamo";
-                divP.innerHTML = `
-                    <div class="cuota-header">
-                        <span>${p.banco}</span>
-                        <span class="monto-cuota">S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</span>
-                    </div>
-                    <div class="cuota-footer">
-                        <span>Cuota: ${p.cuota}</span>
-                        <span class="fecha-vence">Vence: ${p.vencimiento}</span>
-                    </div>`;
-                contenedorPrestamos.appendChild(divP);
-            });
-        }
 
     // SOLO mostrar el total si es Cobranzas o Proveedores
     if (tipo === 'Cobranzas' || tipo === 'Proveedores') {
@@ -353,7 +315,41 @@ async function cargarDatos(tipo) {
   }
 }
 
+async function obtenerListaPrestamosParaBancos() {
+
+  const contenedorPrestamos = document.getElementById('seccionPrestamos');
+  if(!contenedorPrestamos) return;
+
+ try {
+        const res = await fetch(`${urlAppScript}?pestana=Prestamos`);
+        const prestamos = await res.json();
+
+        contenedorP.innerHTML = "<h3 style='margin: 20px 0 10px 10px;'>💳 Cuotas de Préstamos</h3>";
+
+        prestamos.forEach(p => {
+            const divP = document.createElement("div");
+            divP.className = "card-cuota-prestamo"; // Usa el CSS que definimos antes
+            divP.innerHTML = `
+                <div class="cuota-header" style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>${p.banco}</span>
+                    <span>S/. ${Number(p.monto).toLocaleString('es-PE')}</span>
+                </div>
+                <div class="cuota-footer" style="display:flex; justify-content:space-between; font-size:12px; color:gray;">
+                    <span>Cuota: ${p.cuota}</span>
+                    <span>Vence: ${p.vencimiento}</span>
+                </div>
+            `;
+            contenedorP.appendChild(divP);
+        });
+    } catch (e) {
+        console.error("Error cargando préstamos debajo de bancos:", e);
+    }
+  
+}
+
 function renderizarBancos(datosBancos, datosPrestamos) {
+
+  
     // 1. Referencias a tus contenedores del HTML
     const contenedorBancos = document.getElementById('listaBancos');
     const contenedorPrestamos = document.getElementById('seccionPrestamos');
