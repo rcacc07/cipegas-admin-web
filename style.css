@@ -365,16 +365,84 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));
 }
 
+/* El contenedor que ya tiene el H3 */
 .seccion-prestamos {
-    margin-top: 25px;
-    padding-bottom: 50px; /* Espacio para que el menú no lo tape */
+    margin-top: 30px;
+    padding: 10px;
+    background-color: #fcfcfc; /* Un fondo muy sutil para diferenciarlo */
+    border-radius: 12px;
 }
 
+/* El div donde caen las tarjetas */
+#listaPrestamos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Tarjeta más delgada */
 .card-cuota-prestamo {
-    background: white;
-    border-left: 5px solid #e74c3c; /* Rojo para deudas */
-    padding: 15px;
-    margin: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: #ffffff;
+    border-radius: 8px; /* Bordes ligeramente menos redondeados para verse serio */
+    padding: 8px 12px;  /* Reducimos el relleno drásticamente */
+    margin: 6px 10px;   /* Menos espacio entre tarjetas */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;           /* Espacio mínimo entre líneas */
+    border-left: 5px solid #34495e; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+}
+
+/* Header compacto */
+.cuota-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.banco-tag {
+    background: #f1f3f4;
+    color: #202124;
+    padding: 2px 6px;   /* Tag más pequeño */
+    border-radius: 4px;
+    font-size: 12px;    /* Fuente reducida */
+    font-weight: 700;
+}
+
+.monto-cuota {
+    font-size: 16px;    /* Fuente más moderada */
+    font-weight: 800;
+    color: #d93025;
+}
+
+/* Cuerpo en una sola línea para ahorrar espacio */
+.cuota-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 0;
+    border-radius: 0;
+}
+
+.info-pago {
+    display: flex;
+    width: 100%;
+    justify-content: space-between; /* Ponemos la fecha a un lado y la cuota al otro */
+    align-items: center;
+}
+
+.info-pago b {
+    font-size: 14px;
+    color: #3c4043;
+}
+
+.info-pago small {
+    color: #70757a;
+    font-size: 14px;
+}
+
+.icon-calendar {
+    display: none; /* Quitamos el emoji para ganar espacio y limpieza */
 }

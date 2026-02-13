@@ -37,7 +37,7 @@ function cambiarTab(tabNombre) {
   if (tabNombre === "movimientos") {
     // Es mejor limpiar los contenedores antes de recargar para que el gerente vea el cambio
     document.getElementById("listaBancos").innerHTML = "Cargando...";
-    document.getElementById("listaMovimientos").innerHTML = "Cargando...";
+    //document.getElementById("listaMovimientos").innerHTML = "Cargando...";
     cargarDatos("Bancos");
     //cargarDatos("Movimientos");
   } else if (tabNombre === "cobranzas") {
@@ -45,36 +45,11 @@ function cambiarTab(tabNombre) {
   } else if (tabNombre === "proveedores") {
     cargarDatos("Proveedores");
   }
-    
-  
-  
-}
-
-// Función para GUARDAR datos (Notas o Cuentas)
-async function guardar(tipo) {
-  let payload = { pestana: tipo };
-
-  if (tipo === "Notas") {
-    payload.nota = document.getElementById("notaInput").value;
-  } else if (tipo === "Cobranzas") {
-    payload.concepto = document.getElementById("cuentaConcepto").value;
-    payload.monto = document.getElementById("cuentaMonto").value;
-  }
-
-  await fetch(urlAppScript, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(payload),
-  });
-
-  alert(tipo + " guardado con éxito");
-  cargarDatos(tipo); // Refresca la lista
 }
 
 async function cargarDatos(tipo) {
 
   const lista = document.getElementById("lista" + tipo);
-  const seccionP = document.getElementById("seccionPrestamos");
 
   if (!lista) return; 
 
@@ -188,6 +163,7 @@ async function cargarDatos(tipo) {
             </span>
         </div>`;
         lista.appendChild(li);
+
       } else if (tipo === "Proveedores") {
 
         const montoNumerico = Number(item.monto);
@@ -317,96 +293,52 @@ async function cargarDatos(tipo) {
 
 async function obtenerListaPrestamosParaBancos() {
 
-  const contenedorPrestamos = document.getElementById('seccionPrestamos');
+  const contenedorPrestamos = document.getElementById("listaPrestamos");
   if(!contenedorPrestamos) return;
 
  try {
         const res = await fetch(`${urlAppScript}?pestana=Prestamos`);
         const prestamos = await res.json();
 
-        contenedorP.innerHTML = "<h3 style='margin: 20px 0 10px 10px;'>💳 Cuotas de Préstamos</h3>";
+        contenedorPrestamos.innerHTML = "";
 
         prestamos.forEach(p => {
+
+          // 1. Limpiamos la fecha
+        let fechaLimpia = "---";
+        if (p.vencimiento || p.fecha) {
+          const d = new Date(p.vencimiento || p.fecha);
+          // Formato: 11/02/2026 (Día/Mes/Año)
+          fechaLimpia = d.toLocaleDateString("es-PE", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          });
+    }
             const divP = document.createElement("div");
-            divP.className = "card-cuota-prestamo"; // Usa el CSS que definimos antes
+            divP.className = "card-cuota-prestamo"; 
             divP.innerHTML = `
-                <div class="cuota-header" style="display:flex; justify-content:space-between; font-weight:bold;">
-                    <span>${p.banco}</span>
-                    <span>S/. ${Number(p.monto).toLocaleString('es-PE')}</span>
+                <div class="cuota-header">
+                    <span class="banco-tag">${p.banco || p.entidad}</span>
+                    <div style="text-align: right;">
+                      <small style="color: ${"#1a73e8"}; font-weight: 800; font-size: 9px; text-transform: uppercase;">${p.estado}</small>
+                      <span class="monto-cuota">S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</span>
+                    </div>     
+                                  
                 </div>
-                <div class="cuota-footer" style="display:flex; justify-content:space-between; font-size:12px; color:gray;">
-                    <span>Cuota: ${p.cuota}</span>
-                    <span>Vence: ${p.vencimiento}</span>
+                <div class="cuota-body">
+                  <div class="info-pago">
+                  <b>Vence: <span style="color: ${"#1a73e8"}">${fechaLimpia}</span></b>
+                  </div>
                 </div>
+               
             `;
-            contenedorP.appendChild(divP);
+            contenedorPrestamos.appendChild(divP);
         });
+      
     } catch (e) {
         console.error("Error cargando préstamos debajo de bancos:", e);
-    }
-  
-}
-
-function renderizarBancos(datosBancos, datosPrestamos) {
-
-  
-    // 1. Referencias a tus contenedores del HTML
-    const contenedorBancos = document.getElementById('listaBancos');
-    const contenedorPrestamos = document.getElementById('seccionPrestamos');
-
-    // 2. Limpieza total para evitar duplicados al recargar
-    contenedorBancos.innerHTML = "";
-    contenedorPrestamos.innerHTML = "";
-
-    // --- PARTE A: CÁLCULO Y TARJETA DORADA (TOTAL) ---
-    let totalGeneral = datosBancos.reduce((acc, b) => acc + (Number(b.saldo) || 0), 0);
-    
-    const cardTotal = document.createElement("div");
-    cardTotal.className = "card-total-bancos"; // El diseño premium que hicimos
-    cardTotal.innerHTML = `
-        <div class="texto-resumen">
-            <small>Capital Total en Bancos</small>
-            <h2>S/. ${totalGeneral.toLocaleString('es-PE', {minimumFractionDigits: 2})}</h2>
-        </div>
-    `;
-    contenedorBancos.appendChild(cardTotal);
-
-    // --- PARTE B: LISTA DE SALDOS INDIVIDUALES ---
-    datosBancos.forEach(b => {
-        const divBanco = document.createElement("div");
-        divBanco.className = "card-banco-fila";
-        divBanco.innerHTML = `
-            <div class="info-banco">
-                <b>${b.banco}</b>
-            </div>
-            <div class="monto-banco">S/. ${Number(b.saldo).toLocaleString('es-PE', {minimumFractionDigits: 2})}</div>
-        `;
-        contenedorBancos.appendChild(divBanco);
-    });
-
-    // --- PARTE C: PRÉSTAMOS (Debajo de la lista de bancos) ---
-    if (datosPrestamos && datosPrestamos.length > 0) {
-        const tituloPrestamos = document.createElement("h3");
-        tituloPrestamos.innerHTML = "📅 Próximos Pagos de Préstamos";
-        tituloPrestamos.style.margin = "20px 0 10px 10px";
-        contenedorPrestamos.appendChild(tituloPrestamos);
-
-        datosPrestamos.forEach(p => {
-            const divPrestamo = document.createElement("div");
-            divPrestamo.className = "card-cuota-prestamo";
-            divPrestamo.innerHTML = `
-                <div class="cuota-header">
-                    <span>${p.entidad}</span>
-                    <span class="monto-cuota">S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits: 2})}</span>
-                </div>
-                <div class="cuota-footer">
-                    <span>Cuota: ${p.cuota}</span>
-                    <span class="fecha-vencimiento">Vence: ${p.vencimiento}</span>
-                </div>
-            `;
-            contenedorPrestamos.appendChild(divPrestamo);
-        });
-    }
+    } 
 }
 
 function ponerSaludo() {
