@@ -446,3 +446,106 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
 .icon-calendar {
     display: none; /* Quitamos el emoji para ganar espacio y limpieza */
 }
+/* CSS para ver el menu flotante*/
+/* Asegura que los márgenes no ensanchen las cajas */
+* { box-sizing: border-box; }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px); /* Efecto elegante de desenfoque */
+    display: none; /* Se cambia a flex por JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 10px;
+}
+
+.modal-content {
+    background: #f8f9fa;
+    width: 100%;
+    max-width: 450px; /* Ancho máximo para que no se vea gigante en iPad */
+    max-height: 85vh; /* Que no choque con los bordes del cel */
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column; /* Para que el buscador se quede arriba y la lista ruede */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    animation: aparecer 0.3s ease-out;
+}
+
+@keyframes aparecer {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#contenedorCuentasModal {
+    padding: 10px;
+    overflow-y: auto; /* Solo la lista se mueve, el título y buscador quedan fijos */
+    flex-grow: 1;
+}
+
+.btn-cerrar-modal {
+    background: #eee;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-cuenta-slim {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #fff;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.acciones-cuenta {
+    display: flex;
+    flex-direction: column;
+}
+
+.acciones-cuenta button {
+    border: none;
+    background: #f1f3f4;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cuenta-info {
+    flex: 1; /* Esto hace que el nombre ocupe el espacio sobrante a la izquierda */
+    min-width: 0; 
+    padding-right: 5px; /* Un pequeño respiro antes de los números */
+}
+
+.cuenta-info b {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Si el nombre es muy largo, saldrá como 'Juan Perez Alv...' */
+    font-size: 13px;
+}

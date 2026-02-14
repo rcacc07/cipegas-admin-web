@@ -21,15 +21,27 @@
         </div>
         <h2 id="saludo-gerente" style="font-size: 16px; color: #555; margin-bottom: 20px;"></h2>
 
+        <button id="btnFlotanteCuentas" onclick="abrirModalCuentas()" style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #34495e; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 24px; z-index: 1000;">
+    🏦
+        </button>
+
+        <div id="modalCuentas" class="modal-overlay" onclick="cerrarSiClickFuera(event)">
+            <div class="modal-content" onclick="event.stopPropagation()"> 
+                <div class="modal-header">
+                    <h3 style="margin:0;">Agenda de Cuentas</h3>
+                    <button class="btn-cerrar-modal" onclick="cerrarModalCuentas()">×</button>
+                </div>
+            <div id="contenedorCuentasModal"></div>
+            </div>
+        </div>
+
         <nav class="menu-tabs">
             <button class="tab-btn active" onclick="cambiarTab('movimientos')">Movimientos</button>
             <button class="tab-btn" onclick="cambiarTab('cobranzas')">Cobranzas</button>
-            <button class="tab-btn" onclick="cambiarTab('proveedores')">Proveedores</button>
-            
+            <button class="tab-btn" onclick="cambiarTab('proveedores')">Proveedores</button>          
         </nav>
 
         <section id="sec-movimientos" class="tab-content active">
-
             <div class="seccion-bancos">
                 <h3>Bancos</h3>
                 <div id="listaBancos" class="bancos-columna"></div>
@@ -38,17 +50,13 @@
                 <h3>Por Pagar</h3>
                 <div id="listaPrestamos"></div>
             </div>
-            <!-- 
-       
-            
+            <!--           
             <div class="historial-container">
                 <h3>Historial de Movimientos</h3>
                 <ul id="listaMovimientos">
                 </ul>
             </div>
-
              -->
-
         </section>
 
         <section id="sec-cobranzas" class="tab-content">
