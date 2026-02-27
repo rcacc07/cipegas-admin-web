@@ -304,6 +304,24 @@ async function obtenerListaPrestamosParaBancos() {
 
         prestamos.forEach(p => {
 
+          const estadoTexto = (p.estado || "").toUpperCase();
+          let colorEstado = "";
+          let colorFondoEtiqueta = "";
+
+          if (estadoTexto.includes("MORA")) {
+            colorEstado = "#d93025";      // Rojo Google (Crítico)
+            colorFondoEtiqueta = "#fce8e6"; // Fondo rojizo suave
+          } else if (estadoTexto.includes("HOY")) {
+            colorEstado = "#f2994a";      // Naranja (Alerta)
+            colorFondoEtiqueta = "#fff4e5"; 
+          } else {
+            colorEstado = "#1a73e8";      // Azul Google (Informativo/Por vencer)
+            colorFondoEtiqueta = "#e8f0fe"; // Fondo azulado suave
+          }
+
+          
+          
+
           // 1. Limpiamos la fecha
         let fechaLimpia = "---";
         if (p.vencimiento || p.fecha) {
@@ -317,22 +335,52 @@ async function obtenerListaPrestamosParaBancos() {
     }
             const divP = document.createElement("div");
             divP.className = "card-cuota-prestamo"; 
+            divP.style.borderLeft = `6px solid ${colorEstado}`; // Borde lateral grueso con el color del estado
             divP.innerHTML = `
-                <div class="cuota-header">
-                    <span class="banco-tag">${p.banco || p.entidad}</span>
-                    <div style="text-align: right;">
-                      <small style="color: ${"#1a73e8"}; font-weight: 800; font-size: 9px; text-transform: uppercase;">${p.estado}</small>
-                      <span class="monto-cuota">S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</span>
-                    </div>     
-                                  
-                </div>
-                <div class="cuota-body">
-                  <div class="info-pago">
-                  <b>Vence: <span style="color: ${"#1a73e8"}">${fechaLimpia}</span></b>
-                  </div>
-                </div>
-               
-            `;
+    <div class="cuota-header">
+        <span class="banco-tag">${p.banco || p.entidad}</span>
+        <div style="text-align: right;">
+            <small style="
+                background: ${colorFondoEtiqueta}; 
+                color: ${colorEstado}; 
+                padding: 2px 8px; 
+                border-radius: 10px; 
+                font-weight: 800; 
+                font-size: 10px; 
+                display: inline-block; 
+                margin-bottom: 4px;
+                border: 1px solid ${colorEstado}33;
+            ">
+                ${estadoTexto}
+            </small>
+            <span class="monto-cuota" style="color: ${colorEstado};">
+                S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}
+            </span>
+        </div>
+    </div>
+    <div class="cuota-body" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="info-fecha">
+            <small style="color: #888; display: block; font-size: 10px; text-transform: uppercase;">Vencimiento</small>
+            <b style="font-size: 13px; color: ${colorEstado};">${fechaLimpia}</b>
+        </div>
+
+        <div class="cuota-badge" style="
+            background: ${colorEstado}; 
+            color: white; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: 900; 
+            box-shadow: 0 4px 8px ${colorEstado}44;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        ">
+            <span style="font-size: 10px; opacity: 0.8; font-weight: 400;">CUOTA</span> 
+            ${p.cuota}
+        </div>
+    </div>
+`;
             contenedorPrestamos.appendChild(divP);
         });
       
