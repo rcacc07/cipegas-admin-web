@@ -365,14 +365,6 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));
 }
 
-/* El contenedor que ya tiene el H3 */
-.seccion-prestamos {
-    margin-top: 30px;
-    padding: 10px;
-    background-color: #fcfcfc; /* Un fondo muy sutil para diferenciarlo */
-    border-radius: 12px;
-}
-
 /* El div donde caen las tarjetas */
 #listaPrestamos {
     display: flex;
@@ -548,4 +540,102 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     overflow: hidden;
     text-overflow: ellipsis; /* Si el nombre es muy largo, saldrá como 'Juan Perez Alv...' */
     font-size: 13px;
+}
+
+/* La tarjeta base del esqueleto */
+.skeleton-card {
+    background: #fdfdfd; /* Fondo casi blanco */
+    border-radius: 12px;
+    padding: 15px;
+    margin: 10px 0;
+    height: 90px;
+    border-left: 6px solid #eee;
+    position: relative;
+    overflow: hidden; /* Importante para que el brillo no se salga */
+    border: 1px solid #eee;
+}
+
+/* La capa de brillo que se mueve */
+.skeleton-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%; /* Empieza fuera de la tarjeta */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(224, 224, 224, 0.6), 
+        transparent
+    );
+    animation: loading-shine 1.5s infinite;
+}
+
+@keyframes loading-shine {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+/* Líneas de texto falsas */
+.skeleton-line {
+    background: #eeeeee;
+    height: 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.seccion-bancos h3, 
+.seccion-prestamos h3 {
+    margin: 25px 15px 15px 15px; /* Margen simétrico con las tarjetas */
+    font-size: 13px;
+    color: #7f8c8d; /* Un gris elegante */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+}
+
+/* Una rayita sutil al costado del título para que no se vea vacío */
+.seccion-bancos h3::after, 
+.seccion-prestamos h3::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+    margin-left: 15px;
+}
+
+/* Contenedor para centrar el loader */
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    gap: 15px;
+}
+
+/* El círculo animado */
+.circular-loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3; /* Color de fondo del círculo */
+    border-top: 4px solid #34495e; /* Color principal (tu azul) */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Texto de "Cargando..." */
+.loader-text {
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

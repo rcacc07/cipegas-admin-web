@@ -294,6 +294,21 @@ async function cargarDatos(tipo) {
 async function obtenerListaPrestamosParaBancos() {
 
   const contenedorPrestamos = document.getElementById("listaPrestamos");
+  // 1. Mostramos el efecto "Cargando" inmediatamente
+    /* contenedorPrestamos.innerHTML = `
+        <div class="skeleton-card"><div class="skeleton-line" style="width: 40%"></div><div class="skeleton-line" style="width: 80%"></div></div>
+        <div class="skeleton-card"><div class="skeleton-line" style="width: 40%"></div><div class="skeleton-line" style="width: 80%"></div></div>
+    `; */
+    
+
+    // Inyectamos el Circular Loader
+    contenedorPrestamos.innerHTML = `
+        <div class="loader-container">
+            <div class="circular-loader"></div>
+            <div class="loader-text">ACTUALIZANDO PAGOS...</div>
+        </div>
+    `;
+
   if(!contenedorPrestamos) return;
 
  try {
@@ -318,10 +333,6 @@ async function obtenerListaPrestamosParaBancos() {
             colorEstado = "#1a73e8";      // Azul Google (Informativo/Por vencer)
             colorFondoEtiqueta = "#e8f0fe"; // Fondo azulado suave
           }
-
-          
-          
-
           // 1. Limpiamos la fecha
         let fechaLimpia = "---";
         if (p.vencimiento || p.fecha) {
@@ -385,7 +396,7 @@ async function obtenerListaPrestamosParaBancos() {
         });
       
     } catch (e) {
-        console.error("Error cargando préstamos debajo de bancos:", e);
+        contenedorPrestamos.innerHTML = "<p>Error al cargar datos.</p>";
     } 
 }
 
@@ -490,5 +501,7 @@ function cerrarSiClickFuera(event) {
         cerrarModalCuentas();
     }
 }
+
+
 
 
