@@ -110,7 +110,7 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     list-style: none;
     background: #ffffff; 
     margin-bottom: 10px; 
-    padding: 14px; 
+    padding: 4px; 
     border-radius: 12px; 
     border: 1px solid #ebedf0;
     transition: transform 0.1s;
@@ -375,13 +375,12 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
 /* Tarjeta más delgada */
 .card-cuota-prestamo {
     background: #ffffff;
-    border-radius: 8px; /* Bordes ligeramente menos redondeados para verse serio */
-    padding: 8px 12px;  /* Reducimos el relleno drásticamente */
-    margin: 6px 10px;   /* Menos espacio entre tarjetas */
+    border-radius: 12px; /* Bordes ligeramente menos redondeados para verse serio */
+    padding: 18px 20px;  /* Reducimos el relleno drásticamente */
     display: flex;
     flex-direction: column;
     gap: 4px;           /* Espacio mínimo entre líneas */
-    border-left: 5px solid #34495e; 
+    border-left: 6px solid #34495e; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border: 1px solid #f0f0f0;
 }
@@ -585,7 +584,10 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     margin-bottom: 10px;
 }
 
-.seccion-bancos h3, 
+.seccion-bancos h3,
+.seccion-clientes-facturado h3,
+.seccion-clientes-porfacturar h3,
+.seccion-por-pagar h3,
 .seccion-prestamos h3 {
     margin: 25px 15px 15px 15px; /* Margen simétrico con las tarjetas */
     font-size: 13px;
@@ -599,6 +601,9 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
 
 /* Una rayita sutil al costado del título para que no se vea vacío */
 .seccion-bancos h3::after, 
+.seccion-clientes-facturado h3::after,
+.seccion-clientes-porfacturar h3::after,
+.seccion-por-pagar h3::after,
 .seccion-prestamos h3::after {
     content: "";
     flex: 1;
@@ -639,3 +644,4 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+

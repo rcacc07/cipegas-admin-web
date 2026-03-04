@@ -8,8 +8,7 @@ async function cargarDashboard() {
 }
 
 function cambiarTab(tabNombre) {
-
-    // 1. LIMPIAR EL FOCO SELECTOR EN LOS BOTONES
+  // 1. LIMPIAR EL FOCO SELECTOR EN LOS BOTONES
   // Quitamos la clase 'active' de todos los botones para que ninguno brille
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.classList.remove("active");
@@ -17,7 +16,9 @@ function cambiarTab(tabNombre) {
 
   // 2. MOVER EL FOCO AL BOTÓN CLICKEADO
   // Buscamos el botón que ejecutó esta función y le ponemos 'active'
-  const botonPresionado = document.querySelector(`button[onclick*="${tabNombre}"]`);
+  const botonPresionado = document.querySelector(
+    `button[onclick*="${tabNombre}"]`,
+  );
   if (botonPresionado) {
     botonPresionado.classList.add("active");
   }
@@ -35,25 +36,26 @@ function cambiarTab(tabNombre) {
 
   // 5. Cargar los datos correspondientes
   if (tabNombre === "movimientos") {
-    // Es mejor limpiar los contenedores antes de recargar para que el gerente vea el cambio
-    document.getElementById("listaBancos").innerHTML = "Cargando...";
-    //document.getElementById("listaMovimientos").innerHTML = "Cargando...";
     cargarDatos("Bancos");
     //cargarDatos("Movimientos");
   } else if (tabNombre === "cobranzas") {
-    cargarDatos("Cobranzas");
+    cargarCobranzas();
   } else if (tabNombre === "proveedores") {
-    cargarDatos("Proveedores");
+    cargarProveedores();
   }
 }
 
 async function cargarDatos(tipo) {
-
   const lista = document.getElementById("lista" + tipo);
+  if (!lista) return;
 
-  if (!lista) return; 
-
-  lista.innerHTML = "Cargando datos...";
+  // 1. Mostramos el Circular Loader con un diseño minimalista
+  lista.innerHTML = `
+        <div class="loader-container" style="padding: 20px 0;">
+            <div class="circular-loader" style="width: 30px; height: 30px; border-width: 3px;"></div>
+            <p class="loader-text" style="font-size: 10px; margin-top: 10px;">CONSULTANDO SALDOS BANCARIOS...</p>
+        </div>
+    `;
 
   try {
     // Llamamos al Apps Script pasando el nombre de la pestaña (Movimientos, Cuentas o Bancos)
@@ -64,9 +66,7 @@ async function cargarDatos(tipo) {
     const respuestaJson = await respuesta.json();
     lista.innerHTML = ""; // Limpiamos el mensaje de carga
 
-    // Si es Bancos, los items están en respuestaJson.bancos
-    // Si es otro, la respuestaJson es el array directo
-    const datos = (tipo === 'Bancos') ? respuestaJson.bancos : respuestaJson;
+    const datos = tipo === "Bancos" ? respuestaJson.bancos : respuestaJson;
 
     if (datos.length === 0) {
       lista.innerHTML = "<li>No hay registros encontrados.</li>";
@@ -80,11 +80,13 @@ async function cargarDatos(tipo) {
 
     // Invertimos para ver lo más reciente arriba
     datos.reverse().forEach((item) => {
-        
-        const li = (tipo === 'Bancos') ? document.createElement('div') : document.createElement('li');      
-        li.className = "nota-card";
-        const montoNumerico = Number(item.monto) || 0;
-        totalSeccion += montoNumerico; // Sumatoria
+      const li =
+        tipo === "Bancos"
+          ? document.createElement("div")
+          : document.createElement("li");
+      li.className = "nota-card";
+      const montoNumerico = Number(item.monto) || 0;
+      totalSeccion += montoNumerico; // Sumatoria
 
       if (tipo === "Movimientos") {
         // Lógica de agrupación por fecha y colapso
@@ -128,83 +130,9 @@ async function cargarDatos(tipo) {
                     <div class="nota-texto">${item.contenido}</div>
                 `;
         contenedorActual.appendChild(li);
-      } else if (tipo === "Cobranzas") {
-
-        const montoNumerico = Number(item.monto);
-
-        // Niveles de alerta para deudas de clientes
-        const esImportante = montoNumerico >= 100000;
-        const esCritico = montoNumerico >= 1000000;
-
-        let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
-        let fondoEspecial = "#fff";
-        let etiqueta = "";
-
-        if (esCritico) {
-          colorMonto = "#b21f2d"; // Rojo oscuro
-          fondoEspecial = "#fff5f5";
-          etiqueta =
-            '<small style="color: #b21f2d; font-weight: bold;">💎 DEUDA CRÍTICA (>1M)</small>';
-        } else if (esImportante) {
-          colorMonto = "#f2994a"; // Naranja tipo ámbar
-          fondoEspecial = "#fffaf0"; // Fondo crema suave
-          etiqueta =
-            '<small style="color: #f2994a; font-weight: bold;">🔹 DEUDA ELEVADA (>100K)</small>';
-        }
-
-        li.innerHTML = `
-        <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
-            <div>
-                <b style="display: block; color: #333;">${item.cliente}</b>
-                ${etiqueta}
-            </div>
-            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "18px" : "16px"};">
-                S/. ${montoNumerico.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </span>
-        </div>`;
-        lista.appendChild(li);
-
-      } else if (tipo === "Proveedores") {
-
-        const montoNumerico = Number(item.monto);
-
-        // Nueva alerta a partir de 100,000 soles
-        const esImportante = montoNumerico >= 100000;
-        const esCritico = montoNumerico >= 1000000;
-
-        // Definimos los colores según el monto
-        let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
-        let fondoEspecial = "#fff";
-        let etiqueta = "";
-
-        if (esCritico) {
-          colorMonto = "#b21f2d"; // Rojo oscuro
-          fondoEspecial = "#fff5f5";
-          etiqueta =
-            '<small style="color: #b21f2d; font-weight: bold;">⚠️ PAGO CRÍTICO (>1M)</small>';
-        } else if (esImportante) {
-          colorMonto = "#f2994a"; // Naranja tipo ámbar
-          fondoEspecial = "#fffaf0"; // Fondo crema suave
-          etiqueta =
-            '<small style="color: #f2994a; font-weight: bold;">🔸 PAGO ELEVADO (>100K)</small>';
-        }
-
-        li.innerHTML = `
-        <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
-            <div>
-                <b style="display: block; color: #333;">${item.proveedor}</b>
-                ${etiqueta}
-            </div>
-            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "18px" : "16px"};">
-                S/. ${montoNumerico.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </span>
-        </div>
-    `;
-    lista.appendChild(li);
       } else if (tipo === "Bancos") {
-
         totalGeneralBancos += Number(item.saldo) || 0;
-        
+
         const div = document.createElement("div");
         div.className = "card-banco-fila";
 
@@ -235,14 +163,13 @@ async function cargarDatos(tipo) {
                     <small>🕒 Act: ${fechaHoraTxt}</small>
                 </div>
                 <div class="monto-banco">
-                    S/. ${item.saldo.toLocaleString('es-PE',{minimumFractionDigits:2})}
+                    S/. ${item.saldo.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
                 </div>`;
         lista.appendChild(div);
       }
     });
 
-    if(tipo==='Bancos'){
-
+    if (tipo === "Bancos") {
       // CREAR LA TARJETA DEL TOTAL (La pondremos arriba de todo)
       const divTotalBancos = document.createElement("div");
       divTotalBancos.className = "card-total-bancos"; // Nueva clase CSS
@@ -252,39 +179,17 @@ async function cargarDatos(tipo) {
           <span class="emoji-banco">🏦</span>
           <div class="texto-resumen">
             <small>SALDO TOTAL DISPONIBLE</small>
-            <h2>S/. ${totalGeneralBancos.toLocaleString('es-PE', {minimumFractionDigits: 2})}</h2>
+            <h2>S/. ${totalGeneralBancos.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</h2>
           </div>
         </div>`;
 
       // Insertar al principio del contenedor de bancos
-      const contenedorBancos = document.getElementById('listaBancos');
+      const contenedorBancos = document.getElementById("listaBancos");
       contenedorBancos.prepend(divTotalBancos);
-
 
       obtenerListaPrestamosParaBancos();
     }
 
-    // SOLO mostrar el total si es Cobranzas o Proveedores
-    if (tipo === 'Cobranzas' || tipo === 'Proveedores') {
-    
-        const divResumen = document.createElement("div");
-        divResumen.className = "card-resumen-total";
-
-        const esCobranza = (tipo === 'Cobranzas');
-        const titulo = esCobranza ? "TOTAL POR COBRAR" : "TOTAL POR PAGAR";
-        const colorTexto = esCobranza ? "#1a73e8" : "#d9534f";
-
-        divResumen.innerHTML = `
-            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; border-top: 5px solid ${colorTexto};">
-                <small style="color: #5f6368; font-weight: bold; text-transform: uppercase;">${titulo}</small>
-                <div style="font-size: 24px; font-weight: 800; color: ${colorTexto};">
-                    S/. ${totalSeccion.toLocaleString('es-PE', {minimumFractionDigits: 2})}
-                </div>
-            </div>`;
-    
-        // Insertar al inicio
-        lista.prepend(divResumen);
-    }   
   } catch (e) {
     console.error("Error al cargar:", e);
     lista.innerHTML = "Error al conectar con el servidor.";
@@ -292,62 +197,59 @@ async function cargarDatos(tipo) {
 }
 
 async function obtenerListaPrestamosParaBancos() {
-
   const contenedorPrestamos = document.getElementById("listaPrestamos");
   // 1. Mostramos el efecto "Cargando" inmediatamente
-    /* contenedorPrestamos.innerHTML = `
+  /* contenedorPrestamos.innerHTML = `
         <div class="skeleton-card"><div class="skeleton-line" style="width: 40%"></div><div class="skeleton-line" style="width: 80%"></div></div>
         <div class="skeleton-card"><div class="skeleton-line" style="width: 40%"></div><div class="skeleton-line" style="width: 80%"></div></div>
     `; */
-    
 
-    // Inyectamos el Circular Loader
-    contenedorPrestamos.innerHTML = `
+  // Inyectamos el Circular Loader
+  contenedorPrestamos.innerHTML = `
         <div class="loader-container">
             <div class="circular-loader"></div>
-            <div class="loader-text">ACTUALIZANDO PAGOS...</div>
+            <div class="loader-text">CONSULTANDO POR PAGAR...</div>
         </div>
     `;
 
-  if(!contenedorPrestamos) return;
+  if (!contenedorPrestamos) return;
 
- try {
-        const res = await fetch(`${urlAppScript}?pestana=Prestamos`);
-        const prestamos = await res.json();
+  try {
+    const res = await fetch(`${urlAppScript}?pestana=Prestamos`);
+    const prestamos = await res.json();
 
-        contenedorPrestamos.innerHTML = "";
+    contenedorPrestamos.innerHTML = "";
 
-        prestamos.forEach(p => {
+    prestamos.forEach((p) => {
+      const estadoTexto = (p.estado || "").toUpperCase();
+      let colorEstado = "";
+      let colorFondoEtiqueta = "";
 
-          const estadoTexto = (p.estado || "").toUpperCase();
-          let colorEstado = "";
-          let colorFondoEtiqueta = "";
-
-          if (estadoTexto.includes("MORA")) {
-            colorEstado = "#d93025";      // Rojo Google (Crítico)
-            colorFondoEtiqueta = "#fce8e6"; // Fondo rojizo suave
-          } else if (estadoTexto.includes("HOY")) {
-            colorEstado = "#f2994a";      // Naranja (Alerta)
-            colorFondoEtiqueta = "#fff4e5"; 
-          } else {
-            colorEstado = "#1a73e8";      // Azul Google (Informativo/Por vencer)
-            colorFondoEtiqueta = "#e8f0fe"; // Fondo azulado suave
-          }
-          // 1. Limpiamos la fecha
-        let fechaLimpia = "---";
-        if (p.vencimiento || p.fecha) {
-          const d = new Date(p.vencimiento || p.fecha);
-          // Formato: 11/02/2026 (Día/Mes/Año)
-          fechaLimpia = d.toLocaleDateString("es-PE", {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-          });
-    }
-            const divP = document.createElement("div");
-            divP.className = "card-cuota-prestamo"; 
-            divP.style.borderLeft = `6px solid ${colorEstado}`; // Borde lateral grueso con el color del estado
-            divP.innerHTML = `
+      if (estadoTexto.includes("MORA")) {
+        colorEstado = "#d93025"; // Rojo Google (Crítico)
+        colorFondoEtiqueta = "#fce8e6"; // Fondo rojizo suave
+      } else if (estadoTexto.includes("HOY")) {
+        colorEstado = "#f2994a"; // Naranja (Alerta)
+        colorFondoEtiqueta = "#fff4e5";
+      } else {
+        colorEstado = "#1a73e8"; // Azul Google (Informativo/Por vencer)
+        colorFondoEtiqueta = "#e8f0fe"; // Fondo azulado suave
+      }
+      // 1. Limpiamos la fecha
+      let fechaLimpia = "---";
+      if (p.vencimiento || p.fecha) {
+        const d = new Date(p.vencimiento || p.fecha);
+        // Formato: 11/02/2026 (Día/Mes/Año)
+        fechaLimpia = d.toLocaleDateString("es-PE", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+      const divP = document.createElement("div");
+      divP.className = "card-cuota-prestamo";
+      divP.style.borderLeft = `6px solid ${colorEstado}`; // Borde lateral grueso con el color del estado
+      divP.innerHTML = `
     <div class="cuota-header">
         <span class="banco-tag">${p.banco || p.entidad}</span>
         <div style="text-align: right;">
@@ -365,7 +267,7 @@ async function obtenerListaPrestamosParaBancos() {
                 ${estadoTexto}
             </small>
             <span class="monto-cuota" style="color: ${colorEstado};">
-                S/. ${Number(p.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}
+                S/. ${Number(p.monto).toLocaleString("es-PE", { minimumFractionDigits: 2 })}
             </span>
         </div>
     </div>
@@ -392,12 +294,173 @@ async function obtenerListaPrestamosParaBancos() {
         </div>
     </div>
 `;
-            contenedorPrestamos.appendChild(divP);
-        });
-      
-    } catch (e) {
-        contenedorPrestamos.innerHTML = "<p>Error al cargar datos.</p>";
-    } 
+      contenedorPrestamos.appendChild(divP);
+    });
+  } catch (e) {
+    contenedorPrestamos.innerHTML = "<p>Error al cargar datos.</p>";
+  }
+}
+
+async function cargarCobranzas() {
+  const contenedor = document.getElementById("listaCobranzas");
+
+  // Loader personalizado para Clientes
+  contenedor.innerHTML = `
+        <div class="loader-container">
+            <div class="circular-loader"></div>
+            <p class="loader-text">CONSULTANDO COBRANZAS POR CLIENTES ...</p>
+        </div>
+    `;
+
+  try {
+    const res = await fetch(`${urlAppScript}?pestana=Cobranzas`);
+    const datos = await res.json();
+
+    contenedor.innerHTML = ""; // Limpiamos el loader
+    let totalSeccion = 0;
+
+    // Creamos un fragmento o un contenedor temporal para los items
+    const listaItems = document.createElement("div");
+
+    datos.reverse().forEach((item) => {
+      const montoNumerico = Number(item.monto) || 0;
+      totalSeccion += montoNumerico; // Sumatoria
+      // Niveles de alerta para deudas de clientes
+      const esImportante = montoNumerico >= 100000;
+      const esCritico = montoNumerico >= 1000000;
+
+      let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
+      let fondoEspecial = "#fff";
+      let etiqueta = "";
+
+      if (esCritico) {
+        colorMonto = "#b21f2d"; // Rojo oscuro
+        fondoEspecial = "#fff5f5";
+        etiqueta =
+          '<small style="color: #b21f2d; font-weight: bold;">💎 DEUDA CRÍTICA (>1M)</small>';
+      } else if (esImportante) {
+        colorMonto = "#f2994a"; // Naranja tipo ámbar
+        fondoEspecial = "#fffaf0"; // Fondo crema suave
+        etiqueta =
+          '<small style="color: #f2994a; font-weight: bold;">🔹 DEUDA ELEVADA (>100K)</small>';
+      }
+
+      const li = document.createElement("li");
+      //li.className = "nota-card"
+      li.style.listStyle = "none";
+
+      li.innerHTML = `
+        <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
+            <div>
+                <b style="display: block; color: #333;">${item.cliente}</b>
+                ${etiqueta}
+            </div>
+            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "18px" : "16px"};">
+                S/. ${montoNumerico.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+            </span>
+        </div>`;
+      listaItems.appendChild(li);
+    });
+
+    const titulo = "TOTAL POR COBRAR";
+    const colorTexto = "#1a73e8";
+
+    contenedor.innerHTML = `
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; border-top: 5px solid ${colorTexto};">
+                <small style="color: #5f6368; font-weight: bold; text-transform: uppercase;">${titulo}</small>
+                <div style="font-size: 24px; font-weight: 800; color: ${colorTexto};">
+                    S/. ${totalSeccion.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                </div>
+            </div>`;
+
+    contenedor.appendChild(listaItems);
+  } catch (e) {
+    contenedor.innerHTML = "<p class='error'>Error al cargar cobranzas</p>";
+  }
+}
+
+async function cargarProveedores() {
+  const contenedor = document.getElementById("listaProveedores");
+
+  // Loader personalizado para Clientes
+  contenedor.innerHTML = `
+        <div class="loader-container">
+            <div class="circular-loader"></div>
+            <p class="loader-text">CONSULTANDO PAGOS PROVEEDORES ...</p>
+        </div>
+    `;
+
+  try {
+    const res = await fetch(`${urlAppScript}?pestana=Proveedores`);
+    const datos = await res.json();
+
+    contenedor.innerHTML = ""; // Limpiamos el loader
+
+    let totalSeccion = 0;
+
+    // Creamos un fragmento o un contenedor temporal para los items
+    const listaItems = document.createElement("div");
+
+    datos.forEach((item) => {
+      const montoNumerico = Number(item.monto) || 0;
+      totalSeccion += montoNumerico; // Sumatoria
+
+      // Nueva alerta a partir de 100,000 soles
+      const esImportante = montoNumerico >= 100000;
+      const esCritico = montoNumerico >= 1000000;
+
+      // Definimos los colores según el monto
+      let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
+      let fondoEspecial = "#fff";
+      let etiqueta = "";
+
+      if (esCritico) {
+        colorMonto = "#b21f2d"; // Rojo oscuro
+        fondoEspecial = "#fff5f5";
+        etiqueta =
+          '<small style="color: #b21f2d; font-weight: bold;">⚠️ PAGO CRÍTICO (>1M)</small>';
+      } else if (esImportante) {
+        colorMonto = "#f2994a"; // Naranja tipo ámbar
+        fondoEspecial = "#fffaf0"; // Fondo crema suave
+        etiqueta =
+          '<small style="color: #f2994a; font-weight: bold;">🔸 PAGO ELEVADO (>100K)</small>';
+      }
+      const li = document.createElement("li");
+      li.style.listStyle = "none";
+
+      li.innerHTML = `
+        <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
+            <div>
+                <b style="display: block; color: #333;">${item.proveedor}</b>
+                ${etiqueta}
+            </div>
+            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "18px" : "16px"};">
+                S/. ${montoNumerico.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+            </span>
+        </div>
+    `;
+      listaItems.appendChild(li);
+    });
+
+    //const divResumen = document.createElement("div");
+    //divResumen.className = "card-resumen-total";
+
+    const titulo = "TOTAL POR PAGAR";
+    const colorTexto = "#d9534f";
+
+    contenedor.innerHTML = `
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; border-top: 5px solid ${colorTexto};">
+                <small style="color: #5f6368; font-weight: bold; text-transform: uppercase;">${titulo}</small>
+                <div style="font-size: 24px; font-weight: 800; color: ${colorTexto};">
+                    S/. ${totalSeccion.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                </div>
+            </div>`;
+
+    // Insertar al inicio
+    contenedor.appendChild(listaItems);
+  } catch (error) {
+    contenedor.innerHTML = "<p class='error'>Error al cargar cobranzas</p>";
+  }
 }
 
 function ponerSaludo() {
@@ -417,50 +480,48 @@ window.onload = function () {
 };
 
 function abrirModalCuentas() {
-    document.getElementById("modalCuentas").style.display = "flex";
-    cargarCuentasEnModal(); // Llamamos a la función que trae los datos
+  document.getElementById("modalCuentas").style.display = "flex";
+  cargarCuentasEnModal(); // Llamamos a la función que trae los datos
 }
 
 function cerrarModalCuentas() {
-    document.getElementById("modalCuentas").style.display = "none";
+  document.getElementById("modalCuentas").style.display = "none";
 }
 
 async function cargarCuentasEnModal() {
-    const contenedor = document.getElementById("contenedorCuentasModal");
-    contenedor.innerHTML = "Cargando agenda...";
+  const contenedor = document.getElementById("contenedorCuentasModal");
+  contenedor.innerHTML = "Cargando agenda...";
 
-    try {
-        const res = await fetch(`${urlAppScript}?pestana=AgendaCuentas`);
-        const cuentas = await res.json();
-        
-        contenedor.innerHTML = "";
-        cuentas.forEach(c => {
+  try {
+    const res = await fetch(`${urlAppScript}?pestana=AgendaCuentas`);
+    const cuentas = await res.json();
 
-          
-    // Validamos que el CCI exista, si no ponemos un guion
-    const cciValor = c.cci ? c.cci : "Sin CCI";
-    const numeroCuenta = c.numero ? c.numero : "Sin número";
-    const div = document.createElement("div");
-    div.className = "card-cuenta-slim";
-  
-    // Color dinámico según el tipo
-    const esPropia = (c.tipo && c.tipo.toLowerCase() === "propia");
-    const colorTipo = esPropia ? "#27ae60" : "#2980b9";
-    const textoTipo = esPropia ? "CUENTA PROPIA" : "CUENTA TERCERO";
+    contenedor.innerHTML = "";
+    cuentas.forEach((c) => {
+      // Validamos que el CCI exista, si no ponemos un guion
+      const cciValor = c.cci ? c.cci : "Sin CCI";
+      const numeroCuenta = c.numero ? c.numero : "Sin número";
+      const div = document.createElement("div");
+      div.className = "card-cuenta-slim";
 
-    div.style.borderLeft = `5px solid ${colorTipo}`;
-    div.style.borderLeft = `5px solid ${colorTipo}`;
-    div.style.display = "flex";
-    div.style.alignItems = "center";
-    div.style.padding = "10px";
+      // Color dinámico según el tipo
+      const esPropia = c.tipo && c.tipo.toLowerCase() === "propia";
+      const colorTipo = esPropia ? "#27ae60" : "#2980b9";
+      const textoTipo = esPropia ? "CUENTA PROPIA" : "CUENTA TERCERO";
 
-    div.innerHTML = `
+      div.style.borderLeft = `5px solid ${colorTipo}`;
+      div.style.borderLeft = `5px solid ${colorTipo}`;
+      div.style.display = "flex";
+      div.style.alignItems = "center";
+      div.style.padding = "10px";
+
+      div.innerHTML = `
     <div style="flex: 1; min-width: 0;">
         <span style="color: ${colorTipo}; font-size: 9px; font-weight: 900; display: block; margin-bottom: 2px;">
-            ${(c.tipo || 'TERCERO').toUpperCase()}
+            ${(c.tipo || "TERCERO").toUpperCase()}
         </span>
         <span style="font-size: 11px; color: #666; display: block; margin-bottom: 5px;">
-            ${c.banco} (${c.moneda || 'S/'})
+            ${c.banco} (${c.moneda || "S/"})
         </span>
         
         <div style="display: flex; flex-direction: column; gap: 3px;">
@@ -470,7 +531,7 @@ async function cargarCuentasEnModal() {
             </div>
             <div style="display: flex; align-items: center; gap: 5px;">
                 <small style="font-size: 8px; color: #aaa; width: 40px;">CCI:</small>
-                <code style="background: #e8f0fe; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; color: #1a73e8; flex: 1; white-space: nowrap; letter-spacing: -0.2px;">${c.cci || '---'}</code>
+                <code style="background: #e8f0fe; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; color: #1a73e8; flex: 1; white-space: nowrap; letter-spacing: -0.2px;">${c.cci || "---"}</code>
             </div>
         </div>
     </div>
@@ -481,27 +542,21 @@ async function cargarCuentasEnModal() {
     </div>
 `;
 
-    
-    contenedor.appendChild(div);
-});
-        
-    } catch (e) {
-        contenedor.innerHTML = "Error al cargar la agenda.";
-    }
+      contenedor.appendChild(div);
+    });
+  } catch (e) {
+    contenedor.innerHTML = "Error al cargar la agenda.";
+  }
 }
 
 // Función extra muy útil para el gerente
 function copiarTexto(texto) {
-    navigator.clipboard.writeText(texto);
-    alert("Número copiado: " + texto);
+  navigator.clipboard.writeText(texto);
+  alert("Número copiado: " + texto);
 }
 
 function cerrarSiClickFuera(event) {
-    if (event.target.id === "modalCuentas") {
-        cerrarModalCuentas();
-    }
+  if (event.target.id === "modalCuentas") {
+    cerrarModalCuentas();
+  }
 }
-
-
-
-
