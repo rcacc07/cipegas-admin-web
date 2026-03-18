@@ -645,3 +645,159 @@ ul { padding: 0; margin-top: 10px; flex-grow: 1; }
     100% { transform: rotate(360deg); }
 }
 
+
+/* CSS DETALLE FACTURAS */
+
+/* Contenedor de la tabla para que no se pegue a los bordes */
+.tabla-container {
+    padding: 10px;
+    
+}
+
+.tabla-moderna {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px; /* Espacio entre filas para que parezcan tarjetas */
+}
+
+.tabla-moderna thead {
+    display: none; /* En móvil, las cabeceras de tabla estorban */
+}
+
+.tabla-moderna tr {
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    transition: transform 0.2s;
+}
+
+.tabla-moderna tr:active {
+    transform: scale(0.98); /* Efecto de rebote al tocar */
+}
+
+.tabla-moderna td {
+    padding: 15px;
+    border: none;
+}
+
+/* Redondear las esquinas de la "tarjeta" */
+.tabla-moderna td:first-child {
+    border-radius: 12px 0 0 12px;
+    border-left: 5px solid #e67e22; /* El color de CIPEGAS */
+}
+
+.tabla-moderna td:last-child {
+    border-radius: 0 12px 12px 0;
+    text-align: right;
+}
+
+/* Estilos de texto interno */
+.f-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.f-numero {
+    font-weight: 800;
+    color: #2c3e50;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.f-fecha {
+    font-size: 11px;
+    color: #95a5a6;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.f-monto {
+    font-size: 17px;
+    font-weight: 900;
+    color: #2c3e50;
+}
+.badge-total-detalle {
+    background: #2c3e50;
+    font-size: 24px;
+    color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(44, 62, 80, 0.2);
+}
+.f-venc {
+    font-size: 16px;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Efecto visual para facturas vencidas */
+.vencido-card {
+    background-color: #fff5f5 !important; /* Fondo rojizo suave */
+    border-left: 6px solid #e74c3c !important; /* Borde rojo fuerte */
+}
+
+.vencido-card .f-numero {
+    color: #c0392b; /* Número de factura en rojo oscuro */
+}
+/* Cabecera Minimalista y Potente */
+header {
+    background: #ffffff; /* Fondo blanco limpio */
+    padding: 25px 20px;
+    border-radius: 0 0 25px 25px; /* Curva elegante abajo */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra suave */
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* El botón Volver como una "píldora" sutil */
+.btn-regresar {
+    text-decoration: none;
+    color: #95a5a6; /* Gris suave */
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    margin-bottom: 15px;
+    transition: 0.3s;
+}
+
+.btn-regresar:hover {
+    color: #e67e22; /* Color CIPEGAS al señalar */
+}
+
+/* Título del Proveedor Imponente */
+#nombreProveedor {
+    margin: 5px 0;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+/* El Monto (Ahora es el protagonista) */
+.badge-total-detalle {
+    margin-top: 10px;
+    font-size: 32px;
+    font-weight: 900;
+    color: #27ae60; /* Verde éxito para el dinero */
+    display: block;
+}
+
+/* Un pequeño detalle: la moneda en pequeño */
+.badge-total-detalle::before {
+    content: "Total Deuda ";
+    display: block;
+    font-size: 12px;
+    color: #bdc3c7;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: -5px;
+}
+
+
+

@@ -386,7 +386,7 @@ async function cargarProveedores() {
   contenedor.innerHTML = `
         <div class="loader-container">
             <div class="circular-loader"></div>
-            <p class="loader-text">CONSULTANDO PAGOS PROVEEDORES ...</p>
+            <p class="loader-text">CONSULTANDO DEUDA DE PROVEEDORES ...</p>
         </div>
     `;
 
@@ -427,6 +427,13 @@ async function cargarProveedores() {
       }
       const li = document.createElement("li");
       li.style.listStyle = "none";
+
+      // 2. Configurar la redirección al hacer clic
+      li.onclick = () => {
+        // Pasamos el nombre del proveedor en la URL
+        window.location.href = `detalle-proveedor.html?nombre=${encodeURIComponent(item.proveedor)}`;
+
+      };
 
       li.innerHTML = `
         <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
@@ -477,6 +484,19 @@ function ponerSaludo() {
 window.onload = function () {
   ponerSaludo();
   cargarDashboard();
+
+  // --- 2. LÓGICA DE NAVEGACIÓN INTELIGENTE ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabTarget = urlParams.get('tab');
+
+    if (tabTarget) {
+        // Ejecutamos tu función de cambiar pestaña (asegúrate que se llame así)
+        // Usamos un pequeño delay para asegurar que los datos cargaron
+        setTimeout(() => {
+            cambiarTab(tabTarget); 
+            console.log("Regresando a la pestaña:", tabTarget);
+        }, 100); 
+    }
 };
 
 function abrirModalCuentas() {

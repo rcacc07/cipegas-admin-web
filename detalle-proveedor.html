@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Detalle de Cuenta - CIPEGAS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body style="background-color: #f4f7f6; margin: 0; font-family: sans-serif;">
+    <div class="container">
+        <header style="padding: 20px 0; border-bottom: 2px solid #eee; margin-bottom: 20px;">
+            <a href="index.html?tab=proveedores" class="btn-regresar">← VOLVER AL PANEL</a>
+            <h1 id="nombreProveedor" style="margin: 15px 0 5px 0; color: #2c3e50; font-size: 24px;">Cargando...</h1>
+            <div id="totalDeuda" class="badge-total-detalle">S/. 0.00</div>
+        </header>
+
+        <div id="loaderDetalle" class="loader-container">
+            <div class="circular-loader"></div>
+            <p class="loader-text">DESGLOSANDO FACTURAS...</p>
+        </div>
+
+        <div class="tabla-container" style="overflow-x: auto;">
+            <table class="tabla-moderna">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Factura</th>
+                        <th style="text-align: right;">Monto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaFacturasBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Lógica para capturar el nombre del proveedor desde la URL
+        const params = new URLSearchParams(window.location.search);
+        const proveedorNombre = params.get('nombre');
+        const urlAppScript = "https://script.google.com/macros/s/AKfycbyQmHAPQdSnk1CtV-HUPy77ZQnalyya4hi7B7QOPPMR_e-nQTzydDszU0bCyZPOPu-y/exec"; // Pega aquí tu URL
+
+        document.getElementById('nombreProveedor').innerText = proveedorNombre || "Proveedor";
+
+        async function cargarDetalle() {
+            try {
+                const res = await fetch(`${urlAppScript}?pestana=ProveeFacts`);
+                const datos = await res.json();
+
+                // Filtramos solo las facturas de ESTE proveedor
+                const facturas = datos.filter(f =>
+                    f.nombre.toString().trim().toLowerCase() === proveedorNombre.trim().toLowerCase()
+                );
+                const total = facturas.reduce((sum, f) => sum + Number(f.total), 0);
+
+                document.getElementById('totalDeuda').innerText = `TOTAL: S/. ${total.toLocaleString("es-PE", { minimumFractionDigits: 2 })}`;
+                document.getElementById('loaderDetalle').style.display = 'none';
+
+                const body = document.getElementById('tablaFacturasBody');
+
+                body.innerHTML = facturas.map(f => {
+                    const montoNum = Number(f.total) || 0;
+
+                    // --- LÓGICA DE FECHAS REFORZADA ---
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0); // Ponemos hoy a las 00:00 para comparar solo días
+
+                    // Convertimos "15/03/2026" (D/M/Y) a "2026-03-15" (Y-M-D) para JS
+                    let partes = f.vencimiento ? f.vencimiento.split('/') : [];
+                    let fechaVenc = null;
+
+                    if (partes.length === 3) {
+                        // Formato: Año, Mes (0-11), Día
+                        fechaVenc = new Date(partes[2], partes[1] - 1, partes[0]);
+                    }
+
+                    const esVencido = fechaVenc && fechaVenc < hoy;
+                    // ---------------------------------
+
+                    const colorVenc = esVencido ? "#e74c3c" : "#7f8c8d";
+
+                    return `
+        <tr class="${esVencido ? 'vencido-card' : ''}">
+            <td>
+                <div class="f-info">
+                    <span class="f-numero">Doc. ${f.numero || 'S/N'}</span>
+                    <span class="f-fecha">📅 Emisión: ${f.emision || '--/--/--'}</span>
+                    <span class="f-venc" style="color: ${colorVenc}; font-weight: ${esVencido ? 'bold' : 'normal'};">
+                        ⏳ ${esVencido ? 'VENCIDO' : 'Vence: '} ${f.vencimiento || '--/--/--'}
+                    </span>
+                </div>
+            </td>
+            <td>
+                <div class="f-monto">
+                    S/. ${montoNum.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                </div>
+            </td>
+        </tr>
+    `;
+                }).join('');
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        cargarDetalle();
+    </script>
+</body>
+
+</html>
