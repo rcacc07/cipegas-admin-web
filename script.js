@@ -189,7 +189,6 @@ async function cargarDatos(tipo) {
 
       obtenerListaPrestamosParaBancos();
     }
-
   } catch (e) {
     console.error("Error al cargar:", e);
     lista.innerHTML = "Error al conectar con el servidor.";
@@ -309,25 +308,35 @@ async function cargarCobranzas() {
         <div class="loader-container">
             <div class="circular-loader"></div>
             <p class="loader-text">CONSULTANDO COBRANZAS POR CLIENTES ...</p>
-        </div>
-    `;
+        </div>`;
 
   try {
+
     const res = await fetch(`${urlAppScript}?pestana=Cobranzas`);
     const datos = await res.json();
 
     contenedor.innerHTML = ""; // Limpiamos el loader
-    let totalSeccion = 0;
+  
+    let sumaFacturado = 0;
+    let sumaPendiente = 0;
 
     // Creamos un fragmento o un contenedor temporal para los items
     const listaItems = document.createElement("div");
+    //datos.sort((a, b) => (Number(b.monto) + Number(b.porfacturar)) - (Number(a.monto) + Number(a.porfacturar)));
+
 
     datos.reverse().forEach((item) => {
-      const montoNumerico = Number(item.monto) || 0;
-      totalSeccion += montoNumerico; // Sumatoria
+
+      const montoF = Number(item.monto) || 0;
+      const montoP = Number(item.porfacturar) || 0;
+      const montoTotal = montoF + montoP;
+      
+      sumaFacturado += montoF;
+      sumaPendiente += montoP;
+
       // Niveles de alerta para deudas de clientes
-      const esImportante = montoNumerico >= 100000;
-      const esCritico = montoNumerico >= 1000000;
+      const esImportante = montoTotal >= 100000;
+      const esCritico = montoTotal >= 1000000;
 
       let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
       let fondoEspecial = "#fff";
@@ -345,35 +354,47 @@ async function cargarCobranzas() {
           '<small style="color: #f2994a; font-weight: bold;">🔹 DEUDA ELEVADA (>100K)</small>';
       }
 
-      const li = document.createElement("li");
-      //li.className = "nota-card"
-      li.style.listStyle = "none";
+      const li = document.createElement("div");
+      li.className = "nota-card";
+      li.style.cssText = `display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; align-items: center; background: ${fondoEspecial}; border-left: 6px solid ${esImportante ? colorMonto : "#eee"};`;
 
       li.innerHTML = `
-        <div class="nota-texto" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 8px; margin-bottom: 8px; border-left: 6px solid ${colorMonto};">
-            <div>
-                <b style="display: block; color: #333;">${item.cliente}</b>
-                ${etiqueta}
+        <div class="cliente-info">
+            ${etiqueta}
+            <div style="font-weight: 800; color: #2c3e50; font-size: 15px;">${item.cliente}</div>
+            <div style="font-size: 15px; color: #140c05; font-weight: 600; margin-top: 4px;">
+                <span style="background: #fff3e0; padding: 2px 6px; border-radius: 4px;">
+                    ⏳ Por Facturar: S/. ${montoP.toLocaleString("es-PE", {minimumFractionDigits:2})}
+                </span>
             </div>
-            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "18px" : "16px"};">
-                S/. ${montoNumerico.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </span>
+        </div>
+        <div class="montos-info" style="text-align: right;">
+            <div style="font-size: 18px; font-weight: 900; color: ${esImportante ? colorMonto : "#2c3e50"};">
+                S/. ${montoF.toLocaleString("es-PE", {minimumFractionDigits:2})}
+            </div>
+            <div style="font-size: 10px; color: #95a5a6; font-weight: bold; text-transform: uppercase;">
+                Saldo Facturado
+            </div>
         </div>`;
+
       listaItems.appendChild(li);
     });
 
-    const titulo = "TOTAL POR COBRAR";
-    const colorTexto = "#1a73e8";
-
+    // --- CABECERA DE TOTALES ---
     contenedor.innerHTML = `
-            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; border-top: 5px solid ${colorTexto};">
-                <small style="color: #5f6368; font-weight: bold; text-transform: uppercase;">${titulo}</small>
-                <div style="font-size: 24px; font-weight: 800; color: ${colorTexto};">
-                    S/. ${totalSeccion.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-                </div>
-            </div>`;
+    <div style="text-align: center; padding: 20px; background: #2c3e50; color: white; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <small style="color: #bdc3c7; letter-spacing: 1px; font-weight: bold;">POTENCIAL TOTAL DE COBRO</small>
+        <div style="font-size: 36px; font-weight: 900; color: #e67e22; margin: 5px 0;">
+            S/. ${(sumaFacturado + sumaPendiente).toLocaleString("es-PE", {minimumFractionDigits:2})}
+        </div>
+        <div style="display: flex; justify-content: space-around; margin-top: 10px; border-top: 1px solid #3e444a; padding-top: 10px;">
+            <div><small style="font-size: 12px;"color: #27ae60; display: block;">FACTURADO </small><b>S/. ${sumaFacturado.toLocaleString("es-PE",{minimumFractionDigits:2})}</b></div>
+            <div><small style="font-size: 12px;"color: #e67e22; display: block;">PENDIENTE </small><b>S/. ${sumaPendiente.toLocaleString("es-PE",{minimumFractionDigits:2})}</b></div>
+        </div>
+    </div>`;
 
     contenedor.appendChild(listaItems);
+  
   } catch (e) {
     contenedor.innerHTML = "<p class='error'>Error al cargar cobranzas</p>";
   }
@@ -432,7 +453,6 @@ async function cargarProveedores() {
       li.onclick = () => {
         // Pasamos el nombre del proveedor en la URL
         window.location.href = `detalle-proveedor.html?nombre=${encodeURIComponent(item.proveedor)}`;
-
       };
 
       li.innerHTML = `
@@ -486,17 +506,17 @@ window.onload = function () {
   cargarDashboard();
 
   // --- 2. LÓGICA DE NAVEGACIÓN INTELIGENTE ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabTarget = urlParams.get('tab');
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabTarget = urlParams.get("tab");
 
-    if (tabTarget) {
-        // Ejecutamos tu función de cambiar pestaña (asegúrate que se llame así)
-        // Usamos un pequeño delay para asegurar que los datos cargaron
-        setTimeout(() => {
-            cambiarTab(tabTarget); 
-            console.log("Regresando a la pestaña:", tabTarget);
-        }, 100); 
-    }
+  if (tabTarget) {
+    // Ejecutamos tu función de cambiar pestaña (asegúrate que se llame así)
+    // Usamos un pequeño delay para asegurar que los datos cargaron
+    setTimeout(() => {
+      cambiarTab(tabTarget);
+      console.log("Regresando a la pestaña:", tabTarget);
+    }, 100);
+  }
 };
 
 function abrirModalCuentas() {
