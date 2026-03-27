@@ -2,11 +2,12 @@
 <html lang="es">
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Notas Cloud</title>
-    <link rel="stylesheet" href="style.css">
+    <title>CIPEGAS App</title>
+    <link rel="stylesheet" href="./css/style.css">
+
 </head>
 
 <body>
@@ -37,61 +38,32 @@
         </div>
 
         <nav class="menu-tabs">
-            <button class="tab-btn active" onclick="cambiarTab('movimientos')">Movimientos</button>
-            <button class="tab-btn" onclick="cambiarTab('cobranzas')">Cobranzas</button>
-            <button class="tab-btn" onclick="cambiarTab('proveedores')">Proveedores</button>
+            <button id="btn-movimientos" class="tab-btn">Bancos</button>
+            <button id="btn-cobranzas" class="tab-btn">Cobranzas</button>
+            <button id="btn-proveedores" class="tab-btn">Proveedores</button>
         </nav>
 
-        <section id="sec-movimientos" class="tab-content active">
-            <div class="seccion-bancos">
-                <div class="titulo-seccion">
-                    <h3>Bancos</h3>
-                    <span class="linea-decorativa"></span>
+        <main>
+            <div id="sec-movimientos" class="tab-content">
+                <div id="listaBancos"></div>
+                <div class="seccion-prestamos" style="margin-top: 30px;">
+                    <h3>Obligaciones Financieras</h3>
+                    <div id="listaPrestamos"></div>
                 </div>
-                <div id="listaBancos" class="bancos-columna"></div>
             </div>
 
-            <div class="seccion-prestamos">
-                <div class="titulo-seccion">
-                    <h3>Por Pagar</h3>
-                    <span class="linea-decorativa"></span>
-                </div>
-                <div id="listaPrestamos"></div>
-            </div>
-
-            <!--           
-            <div class="historial-container">
-                <h3>Historial de Movimientos</h3>
-                <ul id="listaMovimientos">
-                </ul>
-            </div>
-             -->
-        </section>
-
-        <section id="sec-cobranzas" class="tab-content">
-
-            <div class="seccion-clientes-facturado">
-                <div class="titulo-seccion">
-                    <h3>Cuenta de Clientes</h3>
-                    <span class="linea-decorativa"></span>
-                </div>
+            <div id="sec-cobranzas" class="tab-content">
                 <div id="listaCobranzas"></div>
+                <div id="detalleCobranza" style="display: none;"></div>
             </div>
-        </section>
 
-        <section id="sec-proveedores" class="tab-content">
-            <div class="seccion-por-pagar">
-                <div class="titulo-seccion">
-                    <h3>Cuenta de Proveedores</h3>
-                    <span class="linea-decorativa"></span>
-                </div>
+            <div id="sec-proveedores" class="tab-content">
                 <div id="listaProveedores"></div>
-
+                <div id="detalleProveedores" style="display: none;"></div>
             </div>
-
-        </section>
+        </main>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="./js/app.js"></script>
 </body>
 
 </html>

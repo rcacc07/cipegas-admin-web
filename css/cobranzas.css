@@ -1,0 +1,11 @@
+/* css/cobranzas.css */
+.grupo-fecha { margin-bottom: 10px; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+.fecha-separador { font-size: 13px; font-weight: bold; color: #007bff; background: #e7f3ff; padding: 12px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; }
+.fecha-separador::after { content: "▼"; font-size: 10px; transition: transform 0.3s; }
+.grupo-fecha[open] .fecha-separador::after { transform: rotate(180deg); }
+.grupo-fecha .nota-card { margin: 8px 10px; border-left: 3px solid #007bff; }
+
+ul { padding: 0; margin-top: 10px; flex-grow: 1; }
+.nota-card { list-style: none; background: #ffffff; margin-bottom: 10px; padding: 4px; border-radius: 12px; border: 1px solid #ebedf0; transition: transform 0.1s; }
+.nota-card:active { transform: scale(0.98); background-color: #f9f9f9; }
+.nota-hora { font-size: 11px; color: #bcc0c4; font-weight: 600; }

@@ -1,0 +1,10 @@
+/* css/style.css */
+
+/* ⚠️ IMPORTANTE: Los @import siempre deben ir en la primera línea del archivo */
+@import url('./global.css');
+@import url('./navegacion.css');
+@import url('./bancos.css');
+@import url('./cobranzas.css');
+@import url('./proveedores.css');
+
+/* Fin del archivo. ¡Nada más! */
