@@ -1,4 +1,5 @@
 import { obtenerDatosGoogle } from './api.js';
+import { arreglarFechaPeruana, formatoMoneda } from "./utils.js";
 
 export async function cargarBancos() {
     const lista = document.getElementById("listaBancos");
@@ -101,7 +102,9 @@ async function cargarPrestamos() {
             // Adaptamos las variables (Asegúrate de que coincidan con las cabeceras de tu Excel)
             const nombreBanco = prestamo.banco || "Banco";
             const montoCuota = Number(prestamo.monto || 0);
-            const fechaVence = formatearFecha(prestamo.vencimiento);
+            
+            const dfechaVence = arreglarFechaPeruana(prestamo.vencimiento);
+            const fechaVence = dfechaVence ? dfechaVence.toLocaleDateString("es-PE") : "--/--/----";
             const cuota = prestamo.cuota || "Cuota mensual";
 
             div.innerHTML = `
