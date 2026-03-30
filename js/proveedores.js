@@ -164,7 +164,7 @@ export async function abrirDetalleProveedor(rucProveedor, proveedorNombre) {
         // Ponemos la hora a cero para que no haya falsos positivos por la hora
         hoy.setHours(0, 0, 0, 0);
 
-        const estaVencida = dVencimiento && dVencimiento < hoy;
+        const estaVencida = dVencimiento && dVencimiento <= hoy;
         const colorBorde = estaVencida ? "#e74c3c" : "#1a73e8"; // Rojo si venció, azul si no
 
         // ... Aquí debajo continúa el HTML de tu tarjeta (html += `...`) ...
@@ -177,7 +177,7 @@ export async function abrirDetalleProveedor(rucProveedor, proveedorNombre) {
                                     ${estaVencida ? "⚠️ FACTURA VENCIDA" : "FACTURA"}
                                 </span>
                                 <div style="font-weight: 800; color: #2c3e50; font-size: 15px;">
-                                    ${doc.numero + "-" + doc.documento || "Sin Nro"}
+                                    ${doc.numero || "Sin Nro"}
                                 </div>
                             </div>
                             <div style="font-size: 18px; font-weight: 900; color: #2c3e50; text-align: right;">
