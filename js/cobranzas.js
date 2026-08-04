@@ -2,7 +2,6 @@ import { arreglarFechaPeruana, formatoMoneda } from "./utils.js";
 import { obtenerDatosGoogle } from "./api.js";
 
 export async function cargarCobranzas() {
-  // ... todo el código gigante de tu lista y el HTML ...
   const contenedor = document.getElementById("listaCobranzas");
 
   // Loader personalizado para Clientes
@@ -14,118 +13,170 @@ export async function cargarCobranzas() {
 
   try {
     const datos = await obtenerDatosGoogle("Cobranzas");
-    contenedor.innerHTML = ""; // Limpiamos el loader
-
-    let sumaFacturado = 0;
-    let sumaPendiente = 0;
-
-    // Creamos un fragmento o un contenedor temporal para los items
-    const listaItems = document.createElement("div");
-
-    datos.reverse().forEach((item) => {
-      const montoF = Number(item.monto) || 0;
-      const montoP = Number(item.porfacturar) || 0;
-      const montoTotal = montoF + montoP;
-
-      sumaFacturado += montoF;
-      sumaPendiente += montoP;
-
-      // Niveles de alerta para deudas de clientes
-      const esImportante = montoTotal >= 100000;
-      const esCritico = montoTotal >= 1000000;
-
-      let colorMonto = "#1a73e8"; // Azul estándar (identifica que es ingreso)
-      let fondoEspecial = "#fff";
-      let etiqueta = "";
-
-      if (esCritico) {
-        colorMonto = "#b21f2d"; // Rojo oscuro
-        fondoEspecial = "#fff5f5";
-        etiqueta =
-          '<small style="color: #b21f2d; font-weight: bold;">💎 DEUDA CRÍTICA (>1M)</small>';
-      } else if (esImportante) {
-        colorMonto = "#f2994a"; // Naranja tipo ámbar
-        fondoEspecial = "#fffaf0"; // Fondo crema suave
-        etiqueta =
-          '<small style="color: #f2994a; font-weight: bold;">🔹 DEUDA ELEVADA (>100K)</small>';
-      }
-
-      const li = document.createElement("div");
-
-      li.onclick = () => abrirDetalleCliente(item.ruc, item.cliente);
-      li.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 10px; margin-bottom: 12px; border-left: 6px solid ${colorMonto}; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        
-        <div style="flex: 1; min-width: 0;">
-            <div style="margin-bottom: 4px;">
-                ${etiqueta}
-            </div>
-            
-            <b style="display: block; color: #333; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">
-                ${item.cliente}
-            </b>
-            
-            <div style="font-size: 11px; color: #666;">
-                <span style="background: #fff3e0; padding: 2px 6px; border-radius: 4px; border: 1px solid #ffe0b2; display: inline-block;">
-                    ⏳ Por Facturar: S/. ${montoP.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-                </span>
-            </div>
-        </div>
-
-        <div style="text-align: right; margin-left: 10px;">
-            <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "20px" : "17px"}; display: block; line-height: 1;">
-                S/. ${montoF.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </span>
-            <span style="font-size: 9px; color: #95a5a6; font-weight: bold; text-transform: uppercase; display: block; margin-top: 4px;">
-                Saldo Facturado
-            </span>
-        </div>
-        
-    </div>
-`;
-      listaItems.appendChild(li);
+    
+    // 1. FILTRADO DE DATOS
+    const clientesActivos = datos.filter((item) => {
+      const estado = String(item.activo || "").trim().toUpperCase();
+      return estado === "1" || estado === "ACTIVO" || estado === "TRUE";
     });
 
-    // --- CABECERA DE TOTALES ---
-    contenedor.innerHTML = `
-    <div style="text-align: center; padding: 25px 20px; background: #2c3e50; color: white; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border: 1px solid #34495e;">
-        
-        <small style="color: #bdc3c7; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; font-size: 11px;">
-            💰 Potencial Total de Cobro
-        </small>
-        
-        <div style="font-size: 38px; font-weight: 900; color: #f39c12; margin: 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-            S/. ${(sumaFacturado + sumaPendiente).toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-        </div>
+    const clientesInactivos = datos.filter((item) => {
+      const estado = String(item.activo || "").trim().toUpperCase();
+      return (estado === "0" || estado === "INACTIVO" || estado === "FALSE" || estado === "");
+    });
 
-        <div style="height: 1px; background: linear-gradient(to right, transparent, #5d6d7e, transparent); margin: 15px 0;"></div>
+    // Limpiamos el contenedor principal para empezar a construir
+    contenedor.innerHTML = ""; 
 
-        <div style="display: flex; justify-content: space-around; align-items: center;">
-            <div style="flex: 1;">
-                <small style="font-size: 10px; color: #2ecc71; display: block; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">
-                    Facturado
-                </small>
-                <b style="font-size: 16px; color: #ffffff;">
-                    S/. ${sumaFacturado.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-                </b>
+    // ==========================================
+    // SECCIÓN 1: CLIENTES ACTIVOS
+    // ==========================================
+    if (clientesActivos.length > 0) {
+      let sumaFacturadoA = 0;
+      let sumaPendienteA = 0;
+
+      const listaItemsActivos = document.createElement("div");
+      
+      clientesActivos.reverse().forEach((item) => {
+        const montoF = Number(item.monto) || 0;
+        const montoP = Number(item.porfacturar) || 0;
+        const montoTotal = montoF + montoP;
+
+        sumaFacturadoA += montoF;
+        sumaPendienteA += montoP;
+
+        const esImportante = montoTotal >= 100000;
+        const esCritico = montoTotal >= 1000000;
+
+        let colorMonto = "#1a73e8"; 
+        let fondoEspecial = "#fff";
+        let etiqueta = "";
+
+        if (esCritico) {
+          colorMonto = "#b21f2d"; fondoEspecial = "#fff5f5";
+          etiqueta = '<small style="color: #b21f2d; font-weight: bold;">💎 DEUDA CRÍTICA (>1M)</small>';
+        } else if (esImportante) {
+          colorMonto = "#f2994a"; fondoEspecial = "#fffaf0";
+          etiqueta = '<small style="color: #f2994a; font-weight: bold;">🔹 DEUDA ELEVADA (>100K)</small>';
+        }
+
+        const li = document.createElement("div");
+        li.onclick = () => abrirDetalleCliente(item.ruc, item.cliente);
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid ${esImportante ? colorMonto : "#eee"}; border-radius: 10px; margin-bottom: 12px; border-left: 6px solid ${colorMonto}; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer;">
+              <div style="flex: 1; min-width: 0;">
+                  <div style="margin-bottom: 4px;">${etiqueta}</div>
+                  <b style="display: block; color: #333; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">
+                      ${item.cliente}
+                  </b>
+                  <div style="font-size: 11px; color: #666;">
+                      <span style="background: #fff3e0; padding: 2px 6px; border-radius: 4px; border: 1px solid #ffe0b2; display: inline-block;">
+                          ⏳ Por Facturar: S/. ${montoP.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                      </span>
+                  </div>
+              </div>
+              <div style="text-align: right; margin-left: 10px;">
+                  <span style="color: ${colorMonto}; font-weight: 800; font-size: ${esImportante ? "20px" : "17px"}; display: block; line-height: 1;">
+                      S/. ${montoF.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                  </span>
+                  <span style="font-size: 9px; color: #95a5a6; font-weight: bold; text-transform: uppercase; display: block; margin-top: 4px;">
+                      Saldo Facturado
+                  </span>
+              </div>
+          </div>`;
+        listaItemsActivos.appendChild(li);
+      });
+
+      // Renderizamos el Resumen de Activos
+      const seccionActivos = document.createElement("div");
+      seccionActivos.innerHTML = `
+        <h3 style="font-size: 14px; color: #2ecc71; margin-bottom: 10px; margin-top: 10px;">🟢 CARTERA ACTIVA</h3>
+        <div style="background: #2c3e50; color: white; border-radius: 18px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 6px solid #2ecc71;">
+            <small style="color: #bdc3c7; letter-spacing: 1px; font-weight: bold; font-size: 10px; text-transform: uppercase;">
+                💰 TOTAL POR COBRAR (ACTIVOS - ${clientesActivos.length})
+            </small>
+            <div style="font-size: 32px; font-weight: 900; color: #ffffff; margin: 5px 0;">
+                S/. ${(sumaFacturadoA + sumaPendienteA).toLocaleString("es-PE", { minimumFractionDigits: 2 })}
             </div>
-            
-            <div style="width: 1px; height: 30px; background: #5d6d7e;"></div>
-
-            <div style="flex: 1;">
-                <small style="font-size: 10px; color: #e67e22; display: block; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">
-                    Pendiente
-                </small>
-                <b style="font-size: 16px; color: #ffffff;">
-                    S/. ${sumaPendiente.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-                </b>
+            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                <span>Facturado: <b>S/. ${sumaFacturadoA.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</b></span>
+                <span style="color: #f39c12;">Pendiente: <b>S/. ${sumaPendienteA.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</b></span>
             </div>
         </div>
-    </div>`;
+      `;
+      contenedor.appendChild(seccionActivos);
+      contenedor.appendChild(listaItemsActivos);
+    }
 
-    contenedor.appendChild(listaItems);
+    // ==========================================
+    // SECCIÓN 2: CLIENTES INACTIVOS
+    // ==========================================
+    if (clientesInactivos.length > 0) {
+      let sumaFacturadoI = 0;
+      let sumaPendienteI = 0;
+
+      const listaItemsInactivos = document.createElement("div");
+      
+      clientesInactivos.reverse().forEach((item) => {
+        const montoF = Number(item.monto) || 0;
+        const montoP = Number(item.porfacturar) || 0;
+
+        sumaFacturadoI += montoF;
+        sumaPendienteI += montoP;
+
+        const colorMonto = "#000000"; 
+        const fondoEspecial = "#fafafa";
+
+        const li = document.createElement("div");
+        li.onclick = () => abrirDetalleCliente(item.ruc, item.cliente);
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${fondoEspecial}; border: 1px solid #e0e0e0; border-radius: 10px; margin-bottom: 12px; border-left: 6px solid ${colorMonto}; opacity: 0.8; cursor: pointer;">
+              <div style="flex: 1; min-width: 0;">
+                  <b style="display: block; color: #000000; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">
+                      ${item.cliente}
+                  </b>
+                  <div style="font-size: 11px; color: #010101;">
+                      <span style="background: #f1f2f6; padding: 2px 6px; border-radius: 4px; border: 1px solid #dfe4ea; display: inline-block;">
+                          ⏳ Por Facturar: S/. ${montoP.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                      </span>
+                  </div>
+              </div>
+              <div style="text-align: right; margin-left: 10px;">
+                  <span style="color: ${colorMonto}; font-weight: 800; font-size: 17px; display: block; line-height: 1;">
+                      S/. ${montoF.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                  </span>
+                  <span style="font-size: 9px; color: #95a5a6; font-weight: bold; text-transform: uppercase; display: block; margin-top: 4px;">
+                      Saldo Histórico
+                  </span>
+              </div>
+          </div>`;
+        listaItemsInactivos.appendChild(li);
+      });
+
+      // Renderizamos el Resumen de Inactivos
+      const seccionInactivos = document.createElement("div");
+      seccionInactivos.innerHTML = `
+        <h3 style="font-size: 14px; color: #d03328; margin-bottom: 10px; margin-top: 30px; border-top: 1px solid #cf4343; padding-top: 20px;"> CARTERA INACTIVA (Historial)</h3>
+        <div style="background: #34495e; color: #bdc3c7; border-radius: 18px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 6px solid #95a5a6; opacity: 0.9;">
+            <small style="color: #fcffff; letter-spacing: 1px; font-weight: bold; font-size: 10px; text-transform: uppercase;">
+                ⚪ TOTAL HISTÓRICO (INACTIVOS - ${clientesInactivos.length})
+            </small>
+            <div style="font-size: 32px; font-weight: 900; color: #f5f8fa; margin: 5px 0;">
+                S/. ${(sumaFacturadoI + sumaPendienteI).toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                <span>Facturado: <b>S/. ${sumaFacturadoI.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</b></span>
+                <span>Pendiente: <b>S/. ${sumaPendienteI.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</b></span>
+            </div>
+        </div>
+      `;
+      contenedor.appendChild(seccionInactivos);
+      contenedor.appendChild(listaItemsInactivos);
+    }
+
   } catch (e) {
-    contenedor.innerHTML = "<p class='error'>Error al cargar cobranzas</p>";
+    console.error(e);
+    contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar cobranzas</p>";
   }
 }
 

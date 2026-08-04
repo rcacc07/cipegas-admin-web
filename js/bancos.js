@@ -1,5 +1,5 @@
 import { obtenerDatosGoogle } from './api.js';
-import { arreglarFechaPeruana, formatoMoneda } from "./utils.js";
+import { arreglarFechaPeruana, formatearFechaElegante } from "./utils.js";
 
 export async function cargarBancos() {
     const lista = document.getElementById("listaBancos");
@@ -114,7 +114,7 @@ async function cargarPrestamos() {
                 </div>
                 <div class="cuota-body" style="margin-top: 8px;">
                     <div class="info-pago">
-                        <b>Vence: ${fechaVence}</b>
+                        <b>Vence: ${formatearFechaElegante(fechaVence)}</b>
                         <small>${cuota}</small>
                     </div>
                 </div>

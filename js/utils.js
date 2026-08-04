@@ -34,3 +34,33 @@ export function arreglarFechaPeruana(fecha) {
 export function formatoMoneda(monto) {
     return Number(monto).toLocaleString("es-PE", {minimumFractionDigits: 2});
 }
+
+export function formatearFechaElegante(fechaTexto) {
+    if (!fechaTexto) return "Sin fecha";
+
+    let dia, mesIndex, anio;
+
+    // 1. Si la fecha viene de Google Sheets con barras (ej: "28/6/2026")
+    if (typeof fechaTexto === 'string' && fechaTexto.includes('/')) {
+        const partes = fechaTexto.split('/');
+        dia = partes[0];
+        mesIndex = parseInt(partes[1]) - 1; // Se resta 1 porque el array de meses empieza en 0
+        anio = partes[2];
+    } 
+    // 2. Si viene en formato ISO estándar de programación
+    else {
+        const fecha = new Date(fechaTexto);
+        dia = fecha.getUTCDate();
+        mesIndex = fecha.getUTCMonth();
+        anio = fecha.getUTCFullYear();
+    }
+
+    // Lista de meses
+    const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    // Armamos el texto final
+    return `${dia} de ${meses[mesIndex]} del ${anio}`;
+}
